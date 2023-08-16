@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useAsyncFn } from 'react-use';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
 
 import { Button, MenuList, MenuListItem, Separator, styleReset } from 'react95';
@@ -22,7 +23,6 @@ function fetchEpRss() {
     //data.querySelectorAll("item") etc.
     console.log(podcastFeedData);
   })
-  
 }
 
 const GlobalStyles = createGlobalStyle`
@@ -44,19 +44,27 @@ const GlobalStyles = createGlobalStyle`
   }
 `;
 
-const App = () => (
-  <div>
-    <GlobalStyles />
-    <ThemeProvider theme={original}>
-      <Button onClick={fetchEpRss}>Ping RSS feed for data...</Button>
-      {/* <MenuList>
-        <MenuListItem>🎤 Sing</MenuListItem>
-        <MenuListItem>💃🏻 Dance</MenuListItem>
-        <Separator />
-        <MenuListItem disabled>😴 Sleep</MenuListItem>
-      </MenuList> */}
-    </ThemeProvider>
-  </div>
-);
+const App = () => {
+  const [state, doFetch] = useAsyncFn(async () => {
+    const response = await fetch(EP_FEED_URL);
+    const result = await response.text();
+    return result
+  }, []);
+
+  return (
+    <div>
+      <GlobalStyles />
+      <ThemeProvider theme={original}>
+        <Button onClick={doFetch}>{state.value}</Button>
+        {/* <MenuList>
+          <MenuListItem>🎤 Sing</MenuListItem>
+          <MenuListItem>💃🏻 Dance</MenuListItem>
+          <Separator />
+          <MenuListItem disabled>😴 Sleep</MenuListItem>
+        </MenuList> */}
+      </ThemeProvider>
+    </div>
+  );
+};
 
 export default App;
