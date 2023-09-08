@@ -12,9 +12,17 @@ import notes from './assets/episode-notes.json';
 const EP_FEED_URL = 'https://anchor.fm/s/4cba81a4/podcast/rss';
 const POD_TITLE = "Emotive Pixels: Videogame Deep Dives";
 
-function getTitles(feedRss: string) {
+var feedRssRaw = '';
+var feedEpisodesParsed: NodeListOf<Element>;
+
+function populateFeedEpisodesParsed() {
+  if (!feedEpisodesParsed)
+    feedEpisodesParsed = new window.DOMParser().parseFromString(feedRssRaw, 'text/xml').querySelectorAll("item");
+}
+
+function getTitles() {
   var titlesInclusive = new window.DOMParser()
-    .parseFromString(feedRss, 'text/xml')
+    .parseFromString(feedRssRaw, 'text/xml')
     .querySelectorAll("title");
   return Array.from(titlesInclusive)
     .map(t => t.textContent)
@@ -68,22 +76,46 @@ const App = () => {
 
   const fetchData = async () => {
     try {
+      // Get the podcast RSS feed
       const response = await fetch(EP_FEED_URL);
-      const result = await response.text();
-      const titles = getTitles(result);
-
+      feedRssRaw = await response.text();
+      
+      // Populate the dropdown with episode titles
+      const titles = getTitles();
       titles.forEach(function(element) {
         titleList.push({ label: element, value: element })
       });
-
       setTitles(titleList);
-
-      getNotes();
       
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
+
+  const getEpisodeTextFromEpisodeTitle = async (title: string) => {
+    populateFeedEpisodesParsed();
+
+    // Figure out which season and episode has this title
+    feedEpisodesParsed.forEach(e => {
+      const titleElement = e.querySelector("title");
+
+      if (titleElement && titleElement.textContent === title) {
+        var epId = 'bonus'; //default case
+        var episode = e.getElementsByTagName("itunes:episode");
+        var season = e.getElementsByTagName("itunes:season");
+        if (episode.length > 0) {
+          epId = `S${season[0].textContent}E${episode[0].textContent}`;
+        }
+
+        var bonusText = notes.filter(n => n.episodeId == epId)[0].notes;
+        if (bonusText !== 'bonus')
+          setEpisodeText(bonusText);
+        else
+          setEpisodeText(title);
+      }
+    });
+
+  }
 
   useEffect(() => {
     fetchData();
@@ -96,13 +128,13 @@ const App = () => {
         <div id='grid-wrapper'>
           <Button className='row-four full-width'>Start menu placeholder!</Button>   
           <div className='row-two full-width'>
-            <GroupBox label="What to show">
+            <GroupBox label="Episode Chooser 1995">
               <div>
                 <Select
                   options={titles}
                   menuMaxHeight={250}
                   width={400}
-                  onChange={e => setEpisodeText(e.value)} />
+                  onChange={e => getEpisodeTextFromEpisodeTitle(e.value as string) } />
               </div>
               <div>
                 <Radio value={'d'} label={'Description'} className='row-two' />
