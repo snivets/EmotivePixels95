@@ -1,0 +1,20 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  background-color: aquamarine;
+}
+
+#grid-wrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 10px;
+  width: 100vw;
+  height: 100vh;
+  align-items: end;
+}
+
+.row-one { grid-row: 1; }
+.row-two { grid-row: 2; padding: 0.5rem 0.5rem 0 0.5rem; }
+.row-four { grid-row: 4; }
+.full-width { grid-column: 2 / 3; }

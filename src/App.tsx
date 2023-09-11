@@ -1,17 +1,19 @@
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
-
 import { Button, Frame, GroupBox, Radio, Select, styleReset } from 'react95';
-// pick a theme of your choice
 import original from 'react95/dist/themes/original';
 // original Windows95 font (optionally)
 import ms_sans_serif from 'react95/dist/fonts/ms_sans_serif.woff2';
 import ms_sans_serif_bold from 'react95/dist/fonts/ms_sans_serif_bold.woff2';
+
 import { useEffect, useState } from 'react';
-import notes from './assets/episode-notes.json';
 import DOMPurify from 'dompurify';
+
+import notes from './assets/episode-notes.json';
+import './desktop-styling.css';
 
 const EP_FEED_URL = 'https://anchor.fm/s/4cba81a4/podcast/rss';
 const POD_TITLE = "Emotive Pixels: Videogame Deep Dives";
+const NO_INSIGHT = 'We haven\'t written any insight for this episode yet 😥';
 
 var feedRssRaw = '';
 var parsedFeed: NodeListOf<Element>;
@@ -59,7 +61,7 @@ function getEpisodeDescriptionFromEpisodeTitle(title: string): string {
 }
 
 function getEpisodeInsightFromEpisodeId(episodeId: string): string {
-  var insight = '';
+  var insight = NO_INSIGHT;
   var attempt = notes.filter(n => n.episodeId == episodeId);
   if (attempt.length > 0) {
     insight = attempt[0].notes;
@@ -87,19 +89,6 @@ const GlobalStyles = createGlobalStyle`
     padding: 0;
     margin: 0;
   }
-  #grid-wrapper {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(4, 1fr);
-    gap: 10px;
-    width: 100vw;
-    height: 100vh;
-    align-items: end;
-  }
-  .row-one { grid-row: 1; }
-  .row-two { grid-row: 2; }
-  .row-four { grid-row: 4; }
-  .full-width { grid-column: 2 / 3; }
 `;
 
 const App = () => {
@@ -129,7 +118,7 @@ const App = () => {
     }
   };
 
-  const getEpisodeSeasonString = async (title: string) => {
+  const getEpisodeSeasonString = (title: string) => {
     var e = findEpisodeXmlItem(title);
     var epId = 'bonus'; //default case
     if (!e) {
@@ -156,6 +145,11 @@ const App = () => {
       // Display insights
       setEpisodeText(getEpisodeInsightFromEpisodeId(selectedEpisodeId));
     }
+  }
+  
+
+  const isThereInsight = () => {
+    return getEpisodeInsightFromEpisodeId(selectedEpisodeId) === NO_INSIGHT;
   }
 
   useEffect(() => {
@@ -187,7 +181,7 @@ const App = () => {
                   width={400}
                   onChange={e => getEpisodeSeasonString(e.value as string) } />
               </div>
-              <div>
+              <div className="text-toggle-group">
                 <Radio
                   value={'d'}
                   label={'Description'}
@@ -201,6 +195,7 @@ const App = () => {
                   className='row-two'
                   checked={selectedRadio === 'i'}
                   onChange={() => setSelectedRadio('i')}
+                  disabled={ isThereInsight() }
                 />
               </div>
             </GroupBox>
