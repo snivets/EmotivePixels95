@@ -13,13 +13,15 @@ const EP_FEED_URL = 'https://anchor.fm/s/4cba81a4/podcast/rss';
 const POD_TITLE = "Emotive Pixels: Videogame Deep Dives";
 
 var feedRssRaw = '';
-var feedEpisodesParsed: NodeListOf<Element>;
+var parsedFeed: NodeListOf<Element>;
 
+// Get the podcast feed XML populated to this.parsedFeed
 function populateFeedEpisodesParsed() {
-  if (!feedEpisodesParsed)
-    feedEpisodesParsed = new window.DOMParser().parseFromString(feedRssRaw, 'text/xml').querySelectorAll("item");
+  if (!parsedFeed)
+    parsedFeed = new window.DOMParser().parseFromString(feedRssRaw, 'text/xml').querySelectorAll("item");
 }
 
+// Used to populate the episode selector dropdown
 function getTitles() {
   var titlesInclusive = new window.DOMParser()
     .parseFromString(feedRssRaw, 'text/xml')
@@ -29,8 +31,39 @@ function getTitles() {
     .filter(val => val !== '' && val !== POD_TITLE);
 }
 
-function getNotes() {
-  console.log(notes[0].notes);
+function findEpisodeXmlItem(title: string): Element | null {
+  populateFeedEpisodesParsed();
+
+  // Figure out which season and episode has this title
+  var foundE = null;
+  parsedFeed.forEach(e => {
+    const titleElement = e.querySelector("title");
+
+    if (titleElement && titleElement.textContent === title) {
+      foundE = e;
+      return;
+    }
+  });
+  return foundE;
+}
+
+function getEpisodeDescriptionFromEpisodeTitle(title: string): string {
+  var e = findEpisodeXmlItem(title);
+  if (!e)
+    return 'N/A';
+
+  var descriptionObj = e.getElementsByTagName("description");
+  var descriptionText = descriptionObj[0].textContent;
+  return descriptionText ?? 'No description!';
+}
+
+function getEpisodeInsightFromEpisodeId(episodeId: string): string {
+  var insight = '';
+  var attempt = notes.filter(n => n.episodeId == episodeId);
+  if (attempt.length > 0) {
+    insight = attempt[0].notes;
+  }
+  return insight;
 }
 
 const GlobalStyles = createGlobalStyle`
@@ -71,6 +104,9 @@ const GlobalStyles = createGlobalStyle`
 const App = () => {
   const [titles, setTitles] = useState<any[]>([]);
   const [episodeText, setEpisodeText] = useState<string>('Episode info will appear here - pick an episode!');
+  const [selectedEpisodeId, setSelectedEpisodeId] = useState<string>('');
+  const [selectedEpisodeTitle, setSelectedEpisodeTitle] = useState<string>('');
+  const [selectedRadio, setSelectedRadio] = useState<string>('');
 
   var titleList: any[] = [];
 
@@ -92,34 +128,38 @@ const App = () => {
     }
   };
 
-  const getEpisodeTextFromEpisodeTitle = async (title: string) => {
-    populateFeedEpisodesParsed();
+  const getEpisodeSeasonString = async (title: string) => {
+    var e = findEpisodeXmlItem(title);
+    var epId = 'bonus'; //default case
+    if (!e) {
+      setEpisodeText('error!');
+      return;
+    }
 
-    // Figure out which season and episode has this title
-    feedEpisodesParsed.forEach(e => {
-      const titleElement = e.querySelector("title");
+    var episode = e.getElementsByTagName("itunes:episode");
+    var season = e.getElementsByTagName("itunes:season");
+    if (episode.length > 0) {
+      epId = `S${season[0].textContent}E${episode[0].textContent}`;
+    }
 
-      if (titleElement && titleElement.textContent === title) {
-        var epId = 'bonus'; //default case
-        var episode = e.getElementsByTagName("itunes:episode");
-        var season = e.getElementsByTagName("itunes:season");
-        if (episode.length > 0) {
-          epId = `S${season[0].textContent}E${episode[0].textContent}`;
-        }
-
-        var bonusText = notes.filter(n => n.episodeId == epId)[0].notes;
-        if (bonusText !== 'bonus')
-          setEpisodeText(bonusText);
-        else
-          setEpisodeText(title);
-      }
-    });
-
+    setSelectedEpisodeId(epId);
+    setSelectedEpisodeTitle(title);
   }
 
   useEffect(() => {
     fetchData();
   }, [])
+
+  useEffect(() => {
+    // Update the episode text based on the selectedRadio value
+    if (selectedRadio === 'd') {
+      // Display description
+      setEpisodeText(getEpisodeDescriptionFromEpisodeTitle(selectedEpisodeTitle));
+    } else if (selectedRadio === 'i') {
+      // Display insights
+      setEpisodeText(getEpisodeInsightFromEpisodeId(selectedEpisodeId));
+    }
+  }, [selectedRadio]);
 
   return (
     <>
@@ -134,11 +174,23 @@ const App = () => {
                   options={titles}
                   menuMaxHeight={250}
                   width={400}
-                  onChange={e => getEpisodeTextFromEpisodeTitle(e.value as string) } />
+                  onChange={e => getEpisodeSeasonString(e.value as string) } />
               </div>
               <div>
-                <Radio value={'d'} label={'Description'} className='row-two' />
-                <Radio value={'i'} label={'Insights'} className='row-two' />
+                <Radio
+                  value={'d'}
+                  label={'Description'}
+                  className='row-two'
+                  checked={selectedRadio === 'd'}
+                  onChange={() => setSelectedRadio('d')}
+                />
+                <Radio
+                  value={'i'}
+                  label={'Insights'}
+                  className='row-two'
+                  checked={selectedRadio === 'i'}
+                  onChange={() => setSelectedRadio('i')}
+                />
               </div>
             </GroupBox>
             <Frame
