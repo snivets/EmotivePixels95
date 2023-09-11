@@ -7,6 +7,7 @@ import original from 'react95/dist/themes/original';
 import ms_sans_serif from 'react95/dist/fonts/ms_sans_serif.woff2';
 import ms_sans_serif_bold from 'react95/dist/fonts/ms_sans_serif_bold.woff2';
 import { useEffect, useState } from 'react';
+import DOMPurify from 'dompurify';
 import notes from './assets/episode-notes.json';
 
 const EP_FEED_URL = 'https://anchor.fm/s/4cba81a4/podcast/rss';
@@ -146,11 +147,7 @@ const App = () => {
     setSelectedEpisodeTitle(title);
   }
 
-  useEffect(() => {
-    fetchData();
-  }, [])
-
-  useEffect(() => {
+  const updateFrameInfo = async () => {
     // Update the episode text based on the selectedRadio value
     if (selectedRadio === 'd') {
       // Display description
@@ -159,7 +156,21 @@ const App = () => {
       // Display insights
       setEpisodeText(getEpisodeInsightFromEpisodeId(selectedEpisodeId));
     }
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, [])
+
+  // When we change radio options
+  useEffect(() => {
+    updateFrameInfo();
   }, [selectedRadio]);
+
+  // When we change dropdown options
+  useEffect(() => {
+    updateFrameInfo();
+  }, [selectedEpisodeTitle]);
 
   return (
     <>
@@ -196,9 +207,8 @@ const App = () => {
             <Frame
               variant='outside'
               shadow
-              style={{ padding: '0.5rem', lineHeight: '1.5', width: 600 }}>
-                {episodeText}
-            </Frame>
+              style={{ padding: '0.5rem', lineHeight: '1.5', width: 600 }}
+              dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(episodeText)}} />
           </div>
         </div>
       </ThemeProvider>
