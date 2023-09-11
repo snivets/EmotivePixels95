@@ -9,65 +9,13 @@ import { useEffect, useState } from 'react';
 import DOMPurify from 'dompurify';
 
 import notes from './assets/episode-notes.json';
-import './desktop-styling.css';
+import './assets/desktop-styling.css';
 
 const EP_FEED_URL = 'https://anchor.fm/s/4cba81a4/podcast/rss';
 const POD_TITLE = "Emotive Pixels: Videogame Deep Dives";
 const NO_INSIGHT = 'We haven\'t written any insight for this episode yet 😥';
 
-var feedRssRaw = '';
 var parsedFeed: NodeListOf<Element>;
-
-// Get the podcast feed XML populated to this.parsedFeed
-function populateFeedEpisodesParsed() {
-  if (!parsedFeed)
-    parsedFeed = new window.DOMParser().parseFromString(feedRssRaw, 'text/xml').querySelectorAll("item");
-}
-
-// Used to populate the episode selector dropdown
-function getTitles() {
-  var titlesInclusive = new window.DOMParser()
-    .parseFromString(feedRssRaw, 'text/xml')
-    .querySelectorAll("title");
-  return Array.from(titlesInclusive)
-    .map(t => t.textContent)
-    .filter(val => val !== '' && val !== POD_TITLE);
-}
-
-function findEpisodeXmlItem(title: string): Element | null {
-  populateFeedEpisodesParsed();
-
-  // Figure out which season and episode has this title
-  var foundE = null;
-  parsedFeed.forEach(e => {
-    const titleElement = e.querySelector("title");
-
-    if (titleElement && titleElement.textContent === title) {
-      foundE = e;
-      return;
-    }
-  });
-  return foundE;
-}
-
-function getEpisodeDescriptionFromEpisodeTitle(title: string): string {
-  var e = findEpisodeXmlItem(title);
-  if (!e)
-    return 'N/A';
-
-  var descriptionObj = e.getElementsByTagName("description");
-  var descriptionText = descriptionObj[0].textContent;
-  return descriptionText ?? 'No description!';
-}
-
-function getEpisodeInsightFromEpisodeId(episodeId: string): string {
-  var insight = NO_INSIGHT;
-  var attempt = notes.filter(n => n.episodeId == episodeId);
-  if (attempt.length > 0) {
-    insight = attempt[0].notes;
-  }
-  return insight;
-}
 
 const GlobalStyles = createGlobalStyle`
   ${styleReset}
@@ -97,26 +45,62 @@ const App = () => {
   const [selectedEpisodeId, setSelectedEpisodeId] = useState<string>('');
   const [selectedEpisodeTitle, setSelectedEpisodeTitle] = useState<string>('');
   const [selectedRadio, setSelectedRadio] = useState<string>('');
+  const [feedRssRaw, setFeedRssRaw] = useState<string>('');
 
   var titleList: any[] = [];
 
   const fetchData = async () => {
     try {
-      // Get the podcast RSS feed
+      // Get the podcast RSS feed via fetch
       const response = await fetch(EP_FEED_URL);
-      feedRssRaw = await response.text();
-      
-      // Populate the dropdown with episode titles
-      const titles = getTitles();
-      titles.forEach(function(element) {
-        titleList.push({ label: element, value: element })
-      });
-      setTitles(titleList);
-      
+      setFeedRssRaw(await response.text());
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
+
+  function findEpisodeXmlItem(title: string): Element | null {
+    // Figure out which season and episode has this title
+    var foundE = null;
+    parsedFeed.forEach(e => {
+      const titleElement = e.querySelector("title");
+
+      if (titleElement && titleElement.textContent === title) {
+        foundE = e;
+        return;
+      }
+    });
+    return foundE;
+  }
+
+  function getEpisodeDescriptionFromEpisodeTitle(title: string): string {
+    var e = findEpisodeXmlItem(title);
+    if (!e)
+      return 'N/A';
+
+    var descriptionObj = e.getElementsByTagName("description");
+    var descriptionText = descriptionObj[0].textContent;
+    return descriptionText ?? 'No description!';
+  }
+
+  function getEpisodeInsightFromEpisodeId(episodeId: string): string {
+    var insight = NO_INSIGHT;
+    var attempt = notes.filter(n => n.episodeId == episodeId);
+    if (attempt.length > 0) {
+      insight = attempt[0].notes;
+    }
+    return insight;
+  }
+
+  // Used to populate the episode selector dropdown
+  function getTitles() {
+    var titlesInclusive = new window.DOMParser()
+      .parseFromString(feedRssRaw, 'text/xml')
+      .querySelectorAll("title");
+    return Array.from(titlesInclusive)
+      .map(t => t.textContent)
+      .filter(val => val !== '' && val !== POD_TITLE);
+  }
 
   const getEpisodeSeasonString = (title: string) => {
     var e = findEpisodeXmlItem(title);
@@ -152,9 +136,25 @@ const App = () => {
     return getEpisodeInsightFromEpisodeId(selectedEpisodeId) === NO_INSIGHT;
   }
 
+  // Get podcast XML data on page load
   useEffect(() => {
     fetchData();
-  }, [])
+  }, []);
+
+  // When we get the RSS feed XML back
+  useEffect(() => {
+    if (feedRssRaw) {
+      // Populate the dropdown with episode titles
+      const titles = getTitles();
+      titles.forEach(function(element) {
+        titleList.push({ label: element, value: element })
+      });
+      setTitles(titleList);
+      parsedFeed = new window.DOMParser().parseFromString(feedRssRaw, 'text/xml').querySelectorAll("item");
+      setSelectedRadio('d');
+      setSelectedEpisodeTitle(titleList[0].label); //populate dropdown with most recent episode
+    }
+  }, [feedRssRaw]);
 
   // When we change radio options
   useEffect(() => {
@@ -179,6 +179,7 @@ const App = () => {
                   options={titles}
                   menuMaxHeight={250}
                   width={400}
+                  value={selectedEpisodeTitle}
                   onChange={e => getEpisodeSeasonString(e.value as string) } />
               </div>
               <div className="text-toggle-group">
