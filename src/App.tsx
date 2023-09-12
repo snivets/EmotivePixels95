@@ -1,5 +1,5 @@
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
-import { Button, Frame, GroupBox, Radio, Select, styleReset, AppBar, Toolbar, MenuList, MenuListItem, Separator, TextInput, WindowHeader, Window, WindowContent } from 'react95';
+import { Button, Frame, GroupBox, Radio, Select, styleReset, AppBar, Toolbar, MenuList, MenuListItem, Separator, TextInput, WindowHeader, Window, WindowContent, ScrollView } from 'react95';
 import original from 'react95/dist/themes/original';
 // original Windows95 font (optionally)
 import ms_sans_serif from 'react95/dist/fonts/ms_sans_serif.woff2';
@@ -175,41 +175,42 @@ const App = () => {
       <GlobalStyles />
       <ThemeProvider theme={original}>
         <div id='grid-wrapper'> 
-          <div className='row-two half-width'>
-            <GroupBox label="Episode Chooser 1995">
-              <div>
-                <Select
-                  options={titles}
-                  menuMaxHeight={250}
-                  width={400}
-                  value={selectedEpisodeTitle}
-                  onChange={e => getEpisodeSeasonString(e.value as string) } />
-              </div>
-              <div className="text-toggle-group">
-                <Radio
-                  value={'d'}
-                  label={'Description'}
-                  className='row-two'
-                  checked={selectedRadio === 'd'}
-                  onChange={() => setSelectedRadio('d')}
-                />
-                <Radio
-                  value={'i'}
-                  label={'Insights'}
-                  className='row-two'
-                  checked={selectedRadio === 'i'}
-                  onChange={() => setSelectedRadio('i')}
-                  disabled={ getEpisodeInsightFromEpisodeId(selectedEpisodeId) === NO_INSIGHT }
-                />
-              </div>
-            </GroupBox>
-            <Frame
-              variant='outside'
-              shadow={true}
-              style={{ padding: '0.5rem', lineHeight: '1.5', width: 600 }}
-              dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(episodeText)}} />
-          </div>
-          {/* <Button className='row-four full-width'>Start menu placeholder!</Button> */}
+          <Window className='row-two half-width'>
+            <WindowContent>
+              <GroupBox label="Episode insights">
+                <div>
+                  <Select
+                    options={titles}
+                    menuMaxHeight={250}
+                    width={400}
+                    value={selectedEpisodeTitle}
+                    onChange={e => getEpisodeSeasonString(e.value as string) } />
+                </div>
+                <div className="text-toggle-group">
+                  <Radio
+                    value={'d'}
+                    label={'Description'}
+                    className='row-two'
+                    checked={selectedRadio === 'd'}
+                    onChange={() => setSelectedRadio('d')}
+                  />
+                  <Radio
+                    value={'i'}
+                    label={'Insights'}
+                    className='row-two'
+                    checked={selectedRadio === 'i'}
+                    onChange={() => setSelectedRadio('i')}
+                    disabled={ getEpisodeInsightFromEpisodeId(selectedEpisodeId) === NO_INSIGHT }
+                  />
+                </div>
+              </GroupBox>
+            </WindowContent>
+            <ScrollView style={{ maxHeight: '200px' }}>
+              <div
+                style={{ padding: '0.5rem', lineHeight: '1.5', width: 500, maxHeight: '150px' }}
+                dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(episodeText)}} />
+            </ScrollView>
+          </Window>
           <AppBar className='row-four full-width'>
             <Toolbar style={{ justifyContent: 'space-between' }}>
               <div style={{ position: 'relative', display: 'inline-block' }}>
