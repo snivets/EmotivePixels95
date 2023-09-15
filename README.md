@@ -1,27 +1,8 @@
-# React + TypeScript + Vite
+# Emotive Pixels '95
+This is a silly app that serves as an episode browser for my little videogames podcast that I make with some of my friends. It's a Vite app that has been my playground for learning React - I'm an Angular developer previously (and at heart?).
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Functionally, it's an SPA that lets you browse our episodes and also access some behind-the-scenes text that I wrote about some of the episodes. There's also modals for getting to know each of the members, and some other features meant as a companion piece. I'm absolutely positive the endstate of this project is adding playback support with full-blown Milkdrop integration 😋
 
-Currently, two official plugins are available:
+It's a playground where I can introduce some slightly-overwrought features like React95, and a little bit of state management. If you look through the commit history, you'll see the full journey of someone who is going from zero to hero!
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-   },
-```
-
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+![EP95 app screenshot](/public/screenshot-september.png?raw=true "Screenshot of Nate's EP95 app as of 9/15/2023")

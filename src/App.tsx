@@ -1,12 +1,27 @@
-import { createGlobalStyle, ThemeProvider } from 'styled-components';
-import { Button, Frame, GroupBox, Radio, Select, styleReset, AppBar, Toolbar, MenuList, MenuListItem, Separator, TextInput, WindowHeader, Window, WindowContent, ScrollView } from 'react95';
-import original from 'react95/dist/themes/original';
-// original Windows95 font (optionally)
-import ms_sans_serif from 'react95/dist/fonts/ms_sans_serif.woff2';
-import ms_sans_serif_bold from 'react95/dist/fonts/ms_sans_serif_bold.woff2';
-
 import { useEffect, useMemo, useState } from 'react';
 import DOMPurify from 'dompurify';
+
+import { createGlobalStyle, ThemeProvider } from 'styled-components';
+import {
+  Button,
+  GroupBox,
+  Radio,
+  Select,
+  styleReset,
+  AppBar,
+  Toolbar,
+  MenuList,
+  MenuListItem,
+  Separator,
+  TextInput,
+  WindowHeader,
+  Window,
+  WindowContent,
+  ScrollView
+} from 'react95';
+import original from 'react95/dist/themes/original';
+import ms_sans_serif from 'react95/dist/fonts/ms_sans_serif.woff2';
+import ms_sans_serif_bold from 'react95/dist/fonts/ms_sans_serif_bold.woff2';
 
 import notes from './assets/episode-notes.json';
 import logoImg from './assets/ep-icon.png';
@@ -126,8 +141,6 @@ const App = () => {
   const [selectedEpisodeTitle, setSelectedEpisodeTitle] = useState<string>('');
   const [selectedRadio, setSelectedRadio] = useState<string>('');
   const [feedRssRaw, setFeedRssRaw] = useState<string>('');
-
-  var titleList: any[] = [];
 
   const fetchData = async () => {
     try {
