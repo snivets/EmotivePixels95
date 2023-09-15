@@ -16,6 +16,16 @@ const EP_FEED_URL = 'https://anchor.fm/s/4cba81a4/podcast/rss';
 const POD_TITLE = "Emotive Pixels: Videogame Deep Dives";
 const NO_INSIGHT = 'We haven\'t written any insight for this episode yet 😥';
 
+const NATE_TITLE = "Techno Rebel Nate";
+const CRAIG_TITLE = "Coloradical Craig";
+const WILL_TITLE = "Commandline Will";
+const PAULY_TITLE = "Diskjokke Pauly";
+
+const NATE_BIO = "Nate is a loud tall blonde with many passions, most of them boiling down to either architecture, human cultures, or independent music and games. Given that I wrote this I can say that honestly my gaming role model is Chris Plante. Sometimes I wonder if I like books more than games.";
+const CRAIG_BIO = "Craig is a Coloradan in all senses of the term, except that he has a high-functioning job and is in touch with his emotions. He loves all things Sony, and is deeply immersed in all the happenings of the industry. Will someone get this guy a studio executive job already?!";
+const WILL_BIO = "Will is a genius, the biggest and boldest gamer among us (and by that I mean he could complete Factorio the quickest and loves FTL the most), and shows up whenever he feels like it. Unfortunately, we often disappoint him with our choice of games - either too obscure, or insufficiently GAMEY. He loves systems, JRPGs, and Brandon Sanderson. He resides in Seattle, the original hub of the podcast, and in fact lived for a time above the Uwajimaya in the very room where the early episodes were recorded.";
+const PAULY_BIO = "Pauly is the friendly likeable one of the lot, a charming man from New England who loves music, plays music, and is picking up DJing. He likes many kinds of games in no particular pattern that I can discern, but suffice it to say he has great taste. He lives in Syracuse, NY.";
+
 const GlobalStyles = createGlobalStyle`
   ${styleReset}
   @font-face {
@@ -37,6 +47,77 @@ const GlobalStyles = createGlobalStyle`
     margin: 0;
   }
 `;
+
+function CharacterModal(props: any) {
+  return (
+    <Window className='window half-width pauly-dialog'>
+      <WindowHeader active={true} className='window-title'>
+        <span>
+          {props.title}
+        </span>
+        <Button onClick={props.clickFunc}>
+          <span className='close-icon' />
+        </Button>
+      </WindowHeader>
+      <WindowContent>
+        {props.bio}
+      </WindowContent>
+    </Window>
+  );
+}
+
+// Props: open (state), open, funcs for each person's dialog
+function EPStartMenu(props: any) {
+  return (
+    <AppBar className='row-four full-width'>
+      <Toolbar style={{ justifyContent: 'space-between' }}>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <Button
+            onClick={() => props.setOpen(!props.open)}
+            active={props.open}
+            style={{ fontWeight: 'bold' }}
+          >
+            <img src={logoImg} alt='EP logo' style={{ height: '20px', marginRight: 4 }} />
+            Start
+          </Button>
+          {props.open && (
+            <MenuList
+              style={{
+                position: 'absolute',
+                left: '0',
+                top: '100%'
+              }}
+              onClick={() => props.setOpen(false)}
+            >
+              <MenuListItem onClick={props.nateModal}>
+                <span role='img' aria-label={NATE_TITLE}>👱</span>
+                Nate Stevens
+              </MenuListItem>
+              <MenuListItem onClick={props.willModal}>
+                <span role='img' aria-label={WILL_TITLE}>👨‍💻</span>
+                Will Atkinson
+              </MenuListItem>
+              <MenuListItem onClick={props.craigModal}>
+                <span role='img' aria-label={CRAIG_TITLE}>🧗‍♂️</span>
+                Craig Schuemann
+              </MenuListItem>
+              <MenuListItem onClick={props.paulyModal}>
+                <span role='img' aria-label={PAULY_TITLE}>🧞‍♂️</span>
+                Pauly Kroll
+              </MenuListItem>
+              <Separator />
+              <MenuListItem disabled>
+                <span role='img' aria-label='about'>ℹ️</span>
+                About EP
+              </MenuListItem>
+            </MenuList>
+          )}
+        </div>
+        <TextInput placeholder='Search episodes...' width={150} />
+      </Toolbar>
+    </AppBar>
+  );
+}
 
 const App = () => {
   const [titles, setTitles] = useState<any[]>([]);
@@ -145,12 +226,10 @@ const App = () => {
     if (feedRssRaw) {
       // Populate the dropdown with episode titles
       const titles = getTitles();
-      titles.forEach(function(element) {
-        titleList.push({ label: element, value: element })
-      });
-      setTitles(titleList);
+      const updatedTitles = titles.map(element => ({ label: element, value: element }));
+      setTitles(updatedTitles);
       setSelectedRadio('d');
-      setSelectedEpisodeTitle(titleList[0].label); //populate dropdown with most recent episode
+      setSelectedEpisodeTitle(updatedTitles[0].label ?? ''); //populate dropdown with most recent episode
     }
   }, [feedRssRaw]);
 
@@ -173,7 +252,7 @@ const App = () => {
   return (
     <>
       <GlobalStyles />
-      <ThemeProvider theme={original}>
+      <ThemeProvider theme={original}>j
         <div id='grid-wrapper'> 
           <Window className='row-two half-width'>
             <WindowContent>
@@ -211,114 +290,36 @@ const App = () => {
                 dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(episodeText)}} />
             </ScrollView>
           </Window>
-          <AppBar className='row-four full-width'>
-            <Toolbar style={{ justifyContent: 'space-between' }}>
-              <div style={{ position: 'relative', display: 'inline-block' }}>
-                <Button
-                  onClick={() => setOpen(!open)}
-                  active={open}
-                  style={{ fontWeight: 'bold' }}
-                >
-                  <img src={logoImg} alt='EP logo' style={{ height: '20px', marginRight: 4 }} />
-                  Start
-                </Button>
-                {open && (
-                  <MenuList
-                    style={{
-                      position: 'absolute',
-                      left: '0',
-                      top: '100%'
-                    }}
-                    onClick={() => setOpen(false)}
-                  >
-                    <MenuListItem onClick={() => setNateOpen(!nateOpen)}>
-                      <span role='img' aria-label='Techno Rebel Nate'>👱</span>
-                      Nate Stevens
-                    </MenuListItem>
-                    <MenuListItem onClick={() => setWillOpen(!willOpen)}>
-                      <span role='img' aria-label='Commandline Will'>👨‍💻</span>
-                      Will Atkinson
-                    </MenuListItem>
-                    <MenuListItem onClick={() => setCraigOpen(!craigOpen)}>
-                      <span role='img' aria-label='Coloradical Craig'>🧗‍♂️</span>
-                      Craig Schuemann
-                    </MenuListItem>
-                    <MenuListItem onClick={() => setPaulyOpen(!paulyOpen)}>
-                      <span role='img' aria-label='Diskjokke Pauly'>🧞‍♂️</span>
-                      Pauly Kroll
-                    </MenuListItem>
-                    <Separator />
-                    <MenuListItem disabled>
-                      <span role='img' aria-label='about'>ℹ️</span>
-                      About EP
-                    </MenuListItem>
-                  </MenuList>
-                )}
-              </div>
-              <TextInput placeholder='Search episodes...' width={150} />
-            </Toolbar>
-          </AppBar>
+          <EPStartMenu
+            open={open}
+            setOpen={setOpen}
+            nateModal={setNateOpen}
+            craigModal={ setCraigOpen}
+            willModal={setWillOpen}
+            paulyModal={setPaulyOpen} />
           {nateOpen && (
-            <Window className='window half-width nate-dialog'>
-              <WindowHeader active={true} className='window-title'>
-                <span>Techno Rebel Nate</span>
-                <Button onClick={() => setNateOpen(false)}>
-                  <span className='close-icon' />
-                </Button>
-              </WindowHeader>
-              <WindowContent>
-                Nate is a loud tall blonde with many passions, most of them boiling down to either architecture, human
-                cultures, or independent music and games. Given that I wrote this I can say that honestly my gaming
-                role model is Chris Plante. Sometimes I wonder if I like books more than games.
-              </WindowContent>
-            </Window>
+            <CharacterModal
+              clickFunc={() => { setNateOpen(false); }}
+              title={NATE_TITLE}
+              bio={NATE_BIO} />
           )}
           {craigOpen && (
-            <Window className='window half-width craig-dialog'>
-              <WindowHeader active={true} className='window-title'>
-                <span>Coloradical Craig</span>
-                <Button onClick={() => setCraigOpen(false)}>
-                  <span className='close-icon' />
-                </Button>
-              </WindowHeader>
-              <WindowContent>
-                Craig is a Coloradan in all senses of the term, except that he has a high-functioning job and is in
-                touch with his emotions. He loves all things Sony, and is deeply immersed in all the happenings of
-                the industry. Will someone get this guy a studio executive job already?!
-              </WindowContent>
-            </Window>
+            <CharacterModal
+              clickFunc={() => { setCraigOpen(false); }}
+              title={CRAIG_TITLE}
+              bio={CRAIG_BIO} />
           )}
           {willOpen && (
-            <Window className='window half-width will-dialog'>
-              <WindowHeader active={true} className='window-title'>
-                <span>Commandline Will</span>
-                <Button onClick={() => setWillOpen(false)}>
-                  <span className='close-icon' />
-                </Button>
-              </WindowHeader>
-              <WindowContent>
-                Will is a genius, the biggest and boldest gamer among us (and by that I mean he could complete Factorio
-                the quickest and loves FTL the most), and shows up whenever he feels like it. Unfortunately, we often
-                disappoint him with our choice of games - either too obscure, or insufficiently GAMEY. He loves systems,
-                JRPGs, and Brandon Sanderson. He resides in Seattle, the original hub of the podcast, and in fact lived
-                for a time above the Uwajimaya in the very room where the early episodes were recorded.
-              </WindowContent>
-            </Window>
+            <CharacterModal
+              clickFunc={() => { setWillOpen(false); }}
+              title={WILL_TITLE}
+              bio={WILL_BIO} />
           )}
           {paulyOpen && (
-            <Window className='window half-width pauly-dialog'>
-              <WindowHeader active={true} className='window-title'>
-                <span>Diskjokke Pauly</span>
-                <Button onClick={() => setPaulyOpen(false)}>
-                  <span className='close-icon' />
-                </Button>
-              </WindowHeader>
-              <WindowContent>
-                Pauly is the friendly likeable one of the lot, a charming man from New England who loves music, plays
-                music, and is picking up DJing. He likes many kinds of games in no particular pattern that I can discern,
-                but suffice it to say he has great taste. He lives in Syracuse, NY.
-              </WindowContent>
-            </Window>
+            <CharacterModal
+              clickFunc={() => { setPaulyOpen(false); }}
+              title={PAULY_TITLE}
+              bio={PAULY_BIO} />
           )}
         </div>
       </ThemeProvider>
