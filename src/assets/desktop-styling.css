@@ -1,6 +1,16 @@
 /* Get that sweet mint */
 :root {
   background-color: aquamarine;
+  font-family: 'W95FA';
+}
+
+body {
+  position: fixed;
+}
+
+@font-face {
+  font-family: 'W95FA';
+  src: local('W95FA'), url(./w95fa.woff2) format('woff2');
 }
 
 /* Grid stuff */
@@ -18,16 +28,20 @@ a {
   color: cadetblue !important;
 }
 
+.toggle-options {
+  display: flex;
+  align-items: start;
+}
+
+div[class^='Dropdown__'] {
+  width: auto;
+}
+
 .row-one { grid-row: 1; }
 .row-two { grid-row: 2; padding: 0.5rem 0.5rem 0 0.5rem; }
 .row-four { grid-row: 4; }
 .half-width { grid-column: 2 / 3; }
 .full-width { grid-column: 1 / 4; }
-
-.nate-dialog { grid-row: 2; grid-column: 1 / 2 }
-.craig-dialog { grid-row: 1; grid-column: 3 / 4 }
-.will-dialog { grid-row: 3; grid-column: 2 / 3 }
-.pauly-dialog { grid-row: 2; grid-column: 3 / 4 }
 
 /* Dialog stuff */
 .window {
