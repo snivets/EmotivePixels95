@@ -13,6 +13,19 @@ body {
   src: local('W95FA'), url(./w95fa.woff2) format('woff2');
 }
 
+/* Background EP logo */
+.image-container {
+  z-index: -1;
+  position: fixed;
+  bottom: 70px;
+  right: 50px;
+
+  img {
+    width: 256px;
+    height: auto;
+  }
+}
+
 /* Grid stuff */
 #grid-wrapper {
   display: grid;
@@ -35,6 +48,10 @@ a {
 
 div[class^='Dropdown__'] {
   width: auto;
+}
+
+div[class^='TitleBar__Title'] {
+  line-height: 1.1;
 }
 
 .row-one { grid-row: 1; }

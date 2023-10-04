@@ -14,9 +14,12 @@ import {
 import '@react95/icons/icons.css';
 
 import notes from './assets/episode-notes.json';
-import logoImg from './assets/ep-icon.png';
+import logoImg from './assets/ep-logo.jpg';
+import nateImg from './assets/DiscoNate.jpg';
+import craigImg from './assets/DiscoCraig.jpg';
+import willImg from './assets/DiscoWill.jpg';
+import paulyImg from './assets/DiscoPaul.jpg';
 import './assets/desktop-styling.css';
-import { Computer, ReaderClosed, WindowsExplorer } from '@react95/icons';
 
 const EP_FEED_URL = 'https://anchor.fm/s/4cba81a4/podcast/rss';
 const POD_TITLE = "Emotive Pixels: Videogame Deep Dives";
@@ -38,9 +41,9 @@ function CharacterModal(props: any) {
     <Modal
       width="300"
       height="auto"
-      icon={<Computer variant="32x32_4" />}
+      icon={props.icon}
       title={props.title}
-      defaultPosition={{x: props.posish[0] ?? 35, y: props.posish[1] ?? 40}}
+      defaultPosition={{x: props.posish[0], y: props.posish[1]}}
       closeModal={props.clickFunc}
       // buttons={[{
       //   value: 'Ok',
@@ -61,22 +64,22 @@ function EPStartMenu(props: any) {
   return (
     <TaskBar list={<List>
       <List.Item
-        icon={<ReaderClosed variant="32x32_4" />}
+        icon={<img src={nateImg} width={32} />}
         onClick={props.nateModal} >
         {NATE_TITLE}
       </List.Item>
       <List.Item
-        icon={<WindowsExplorer variant="32x32_4" />}
+        icon={<img src={craigImg} width={32} />}
         onClick={props.craigModal} >
         {CRAIG_TITLE}
       </List.Item>
       <List.Item
-        icon={<WindowsExplorer variant="32x32_4" />}
+        icon={<img src={willImg} width={32} />}
         onClick={props.willModal} >
         {WILL_TITLE}
       </List.Item>
       <List.Item
-        icon={<WindowsExplorer variant="32x32_4" />}
+        icon={<img src={paulyImg} width={32} />}
         onClick={props.paulyModal} >
         {PAULY_TITLE}
       </List.Item>
@@ -93,6 +96,9 @@ const App = () => {
   const [insightsEnabled, setInsightsEnabled] = useState<boolean>(false);
   const [feedRssRaw, setFeedRssRaw] = useState<string>('');
 
+// -------------------------
+// XML DATA PROCESSING STUFF
+// -------------------------
   const fetchData = async () => {
     try {
       // Get the podcast RSS feed via fetch
@@ -169,6 +175,10 @@ const App = () => {
     setInsightsEnabled(getEpisodeInsightFromEpisodeId(epId) !== NO_INSIGHT);
   }
 
+// --------------------
+// APP DATA STATE STUFF
+// --------------------
+
   const updateFrameInfo = async () => {
     // Update the episode text based on the selectedRadio value
     if (selectedRadio === 'd') {
@@ -223,95 +233,102 @@ const App = () => {
   const [paulyOpen, setPaulyOpen] = useState(false);
 
   return (
-    <>
-      <ThemeProvider>
-        <div id='grid-wrapper'> 
-          <div className='row-two half-width'>
-            <Frame padding={4}>
-              <Frame boxShadow="in" padding={8} margin={2}>
-                <Fieldset legend="Episode browser">
-                  <Dropdown
-                    options={titles}
-                    defaultValue={selectedEpisodeTitle}
-                    onChange={e => getEpisodeSeasonString(e.currentTarget.value) } />
-                  <div className="toggle-options" style={{margin: '12px 0 -12px 0'}}>
-                    <div style={{width: '22%'}}>
-                      <RadioButton
-                        value={'d'}
-                        className='row-two'
-                        checked={selectedRadio === 'd'}
-                        onChange={() => setSelectedRadio('d')}>
-                        Description
-                      </RadioButton>
-                    </div>
+    <ThemeProvider>
+      <div id='grid-wrapper'> 
+        <div className='row-two half-width'>
+          <Frame padding={4}>
+            <Frame boxShadow="in" padding={8} margin={2}>
+              <Fieldset legend="Episode browser">
+                <Dropdown
+                  options={titles}
+                  defaultValue={selectedEpisodeTitle}
+                  onChange={e => getEpisodeSeasonString(e.currentTarget.value) } />
+                <div className="toggle-options" style={{margin: '12px 0 -12px 0'}}>
+                  <div style={{width: '22%'}}>
                     <RadioButton
-                      value={'i'}
+                      value={'d'}
                       className='row-two'
-                      checked={selectedRadio === 'i'}
-                      onChange={() => setSelectedRadio('i')}
-                      disabled={!insightsEnabled}>
-                      Insights
+                      checked={selectedRadio === 'd'}
+                      onChange={() => setSelectedRadio('d')}>
+                      Description
                     </RadioButton>
                   </div>
-                </Fieldset>
-                <Frame style={{ maxHeight: '150px', width: 500, overflowY: 'auto', padding: '0.5rem', margin: '16px 2px 2px 2px' }}>
-                  <div 
-                    style={{ lineHeight: '1.1' }}
-                    dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(episodeText)}} />
-                </Frame>
+                  <RadioButton
+                    value={'i'}
+                    className='row-two'
+                    checked={selectedRadio === 'i'}
+                    onChange={() => setSelectedRadio('i')}
+                    disabled={!insightsEnabled}>
+                    Insights
+                  </RadioButton>
+                </div>
+              </Fieldset>
+              <Frame style={{ maxHeight: '150px', width: 500, overflowY: 'auto', padding: '0.5rem', margin: '16px 2px 2px 2px' }}>
+                <div 
+                  style={{ lineHeight: '1.1' }}
+                  dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(episodeText)}} />
               </Frame>
             </Frame>
-          </div>
-          <EPStartMenu
-            open={startOpen}
-            setOpen={setStartOpen}
-            nateModal={setNateOpen}
-            craigModal={setCraigOpen}
-            willModal={setWillOpen}
-            paulyModal={setPaulyOpen} />
-          {aboutOpen && (
-            <Modal
-              width="500"
-              height="auto"
-              icon={<Computer variant="32x32_4" />}
-              title="About this podcast"
-              defaultPosition={{x: 5, y: 25}}
-              closeModal={() => { setAboutOpen(false) }}
-          >{ABOUT_PODCAST}</Modal>
-          )}
-          {nateOpen && (
-            <CharacterModal
-              isOpen={nateOpen}
-              clickFunc={() => { setNateOpen(false) }}
-              title={NATE_TITLE}
-              bio={NATE_BIO}
-              posish={[90,355]} />
-          )}
-          {craigOpen && (
-            <CharacterModal
-              isOpen={craigOpen}
-              clickFunc={() => { setCraigOpen(false) }}
-              title={CRAIG_TITLE}
-              bio={CRAIG_BIO}
-              posish={[440,100]} />
-          )}
-          {willOpen && (
-            <CharacterModal
-              isOpen={willOpen}
-              clickFunc={() => { setWillOpen(false) }}
-              title={WILL_TITLE}
-              bio={WILL_BIO} />
-          )}
-          {paulyOpen && (
-            <CharacterModal
-              isOpen={paulyOpen}
-              clickFunc={() => { setPaulyOpen(false); }}
-              title={PAULY_TITLE}
-              bio={PAULY_BIO} />
-          )}
+          </Frame>
         </div>
-      </ThemeProvider>
-    </>
+        <EPStartMenu
+          open={startOpen}
+          setOpen={setStartOpen}
+          nateModal={setNateOpen}
+          craigModal={setCraigOpen}
+          willModal={setWillOpen}
+          paulyModal={setPaulyOpen} />
+        {aboutOpen && (
+          <Modal
+            width="500"
+            height="auto"
+            icon={<img src={logoImg} width={32} />}
+            title="About this podcast"
+            defaultPosition={{x: 5, y: 25}}
+            closeModal={() => { setAboutOpen(false) }}
+        >{ABOUT_PODCAST}</Modal>
+        )}
+        {nateOpen && (
+          <CharacterModal
+            isOpen={nateOpen}
+            clickFunc={() => { setNateOpen(false) }}
+            title={NATE_TITLE}
+            bio={NATE_BIO}
+            posish={[90,355]}
+            icon={<img src={nateImg} width={32} />} />
+        )}
+        {craigOpen && (
+          <CharacterModal
+            isOpen={craigOpen}
+            clickFunc={() => { setCraigOpen(false) }}
+            title={CRAIG_TITLE}
+            bio={CRAIG_BIO}
+            posish={[440,100]}
+            icon={<img src={craigImg} width={32} />} />
+        )}
+        {willOpen && (
+          <CharacterModal
+            isOpen={willOpen}
+            clickFunc={() => { setWillOpen(false) }}
+            title={WILL_TITLE}
+            bio={WILL_BIO}
+            posish={[500, 290]}
+            icon={<img src={willImg} width={32} />} />
+        )}
+        {paulyOpen && (
+          <CharacterModal
+            isOpen={paulyOpen}
+            clickFunc={() => { setPaulyOpen(false) }}
+            title={PAULY_TITLE}
+            bio={PAULY_BIO}
+            posish={[40,70]}
+            icon={<img src={paulyImg} width={32} />} />
+        )}
+      </div>
+      <div className="image-container">
+        <img src={logoImg} alt="podcast logo" />
+      </div>
+    </ThemeProvider>
   );
 };
 

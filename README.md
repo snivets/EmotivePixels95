@@ -5,4 +5,4 @@ Functionally, it's an SPA that lets you browse our episodes and also access some
 
 It's a playground where I can introduce some slightly-overwrought features like React95, and a little bit of state management. If you look through the commit history, you'll see the full journey of someone who is going from zero to hero!
 
-![EP95 app screenshot](/public/screenshot-september.png?raw=true "Screenshot of Nate's EP95 app as of 9/15/2023")
+![EP95 app screenshot](/screenshot-september.png?raw=true "Screenshot of Nate's EP95 app as of 9/15/2023")
