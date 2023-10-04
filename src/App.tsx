@@ -20,7 +20,8 @@ import { Computer, ReaderClosed, WindowsExplorer } from '@react95/icons';
 
 const EP_FEED_URL = 'https://anchor.fm/s/4cba81a4/podcast/rss';
 const POD_TITLE = "Emotive Pixels: Videogame Deep Dives";
-const NO_INSIGHT = 'We haven\'t written any insight for this episode yet 😥';
+const NO_INSIGHT = "We haven\'t written any insight for this episode yet 😥";
+const ABOUT_PODCAST = "Hi! You've reached the website for Emotive Pixels, a videogame podcast hosted by a group of friends that originally met around a table in Seattle to casually banter about games we played. These days, we're a little more focused, and we have a bit more specific goals in how we cover games, so there's a fair difference between early episodes (labeled 'Season 1', up through episode 55) and the current seasons. You can find out about the hosts here, browse and listen to our episodes, and even get some behind-the-scenes insight on fun facts about each show.";
 
 const NATE_TITLE = "Techno Rebel Nate";
 const CRAIG_TITLE = "Coloradical Craig";
@@ -33,22 +34,20 @@ const WILL_BIO = "Will is a genius, the biggest and boldest gamer among us (and 
 const PAULY_BIO = "Pauly is the friendly likeable one of the lot, a charming man from New England who loves music, plays music, and is picking up DJing. He likes many kinds of games in no particular pattern that I can discern, but suffice it to say he has great taste. He lives in Syracuse, NY.";
 
 function CharacterModal(props: any) {
-  console.log('clicked');
-
   return (
     <Modal
       width="300"
       height="auto"
       icon={<Computer variant="32x32_4" />}
       title={props.title}
-      defaultPosition={{x: 35, y: 40}}
+      defaultPosition={{x: props.posish[0] ?? 35, y: props.posish[1] ?? 40}}
       closeModal={props.clickFunc}
       // buttons={[{
       //   value: 'Ok',
       //   onClick: props.clickFunc
       // }]}
       menu={[{
-        name: 'File',
+        name: 'Menu',
         list: <List>
           <List.Item onClick={props.toggleFunc}>Toggle Mode</List.Item>
         </List>
@@ -91,6 +90,7 @@ const App = () => {
   const [selectedEpisodeId, setSelectedEpisodeId] = useState<string>('');
   const [selectedEpisodeTitle, setSelectedEpisodeTitle] = useState<string>('');
   const [selectedRadio, setSelectedRadio] = useState<string>('');
+  const [insightsEnabled, setInsightsEnabled] = useState<boolean>(false);
   const [feedRssRaw, setFeedRssRaw] = useState<string>('');
 
   const fetchData = async () => {
@@ -124,6 +124,9 @@ const App = () => {
 
     var descriptionObj = e.getElementsByTagName("description");
     var descriptionText = descriptionObj[0].textContent;
+    if (descriptionText?.startsWith('<p>')) {
+      descriptionText = descriptionText.substring(3, descriptionText.length - 5);
+    }
     return descriptionText ?? 'No description!';
   }
 
@@ -163,6 +166,7 @@ const App = () => {
 
     setSelectedEpisodeId(epId);
     setSelectedEpisodeTitle(title);
+    setInsightsEnabled(getEpisodeInsightFromEpisodeId(epId) !== NO_INSIGHT);
   }
 
   const updateFrameInfo = async () => {
@@ -186,7 +190,7 @@ const App = () => {
     fetchData();
   }, []);
 
-  // When we get the RSS feed XML back
+  // When we get the RSS feed XML back, select the first item in the list
   useEffect(() => {
     if (feedRssRaw && !selectedEpisodeTitle) {
       // Populate the dropdown with episode titles
@@ -197,17 +201,22 @@ const App = () => {
     }
   }, [feedRssRaw]);
 
-  // When we change radio options
+  // When the active episode changes, see if the insight button should be enabled
   useEffect(() => {
-    updateFrameInfo();
-  }, [selectedRadio]);
+    setInsightsEnabled(getEpisodeInsightFromEpisodeId(selectedEpisodeId) !== NO_INSIGHT);
+  }, [selectedEpisodeId]);
 
-  // When we change dropdown options
   useEffect(() => {
-    updateFrameInfo();
+    getEpisodeSeasonString(selectedEpisodeTitle);
   }, [selectedEpisodeTitle]);
 
-  const [open, setOpen] = useState(false);
+  // When we change radio OR dropdown options
+  useEffect(() => {
+    updateFrameInfo();
+  }, [selectedRadio, selectedEpisodeTitle]);
+
+  const [startOpen, setStartOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(true);
   const [nateOpen, setNateOpen] = useState(false);
   const [craigOpen, setCraigOpen] = useState(false);
   const [willOpen, setWillOpen] = useState(false);
@@ -220,13 +229,12 @@ const App = () => {
           <div className='row-two half-width'>
             <Frame padding={4}>
               <Frame boxShadow="in" padding={8} margin={2}>
-                <Fieldset legend="Episode insights">
+                <Fieldset legend="Episode browser">
                   <Dropdown
                     options={titles}
                     defaultValue={selectedEpisodeTitle}
                     onChange={e => getEpisodeSeasonString(e.currentTarget.value) } />
                   <div className="toggle-options" style={{margin: '12px 0 -12px 0'}}>
-                    {/* TODO: Why is this div necessary? */}
                     <div style={{width: '22%'}}>
                       <RadioButton
                         value={'d'}
@@ -241,44 +249,56 @@ const App = () => {
                       className='row-two'
                       checked={selectedRadio === 'i'}
                       onChange={() => setSelectedRadio('i')}
-                      disabled={ getEpisodeInsightFromEpisodeId(selectedEpisodeId) === NO_INSIGHT }>
-                      Insights    
+                      disabled={!insightsEnabled}>
+                      Insights
                     </RadioButton>
                   </div>
                 </Fieldset>
                 <Frame style={{ maxHeight: '150px', width: 500, overflowY: 'auto', padding: '0.5rem', margin: '16px 2px 2px 2px' }}>
                   <div 
-                    style={{ lineHeight: '1.1', margin: '-16px 0'}}
+                    style={{ lineHeight: '1.1' }}
                     dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(episodeText)}} />
                 </Frame>
               </Frame>
             </Frame>
           </div>
           <EPStartMenu
-            open={open}
-            setOpen={setOpen}
+            open={startOpen}
+            setOpen={setStartOpen}
             nateModal={setNateOpen}
-            craigModal={ setCraigOpen}
+            craigModal={setCraigOpen}
             willModal={setWillOpen}
             paulyModal={setPaulyOpen} />
+          {aboutOpen && (
+            <Modal
+              width="500"
+              height="auto"
+              icon={<Computer variant="32x32_4" />}
+              title="About this podcast"
+              defaultPosition={{x: 5, y: 25}}
+              closeModal={() => { setAboutOpen(false) }}
+          >{ABOUT_PODCAST}</Modal>
+          )}
           {nateOpen && (
             <CharacterModal
               isOpen={nateOpen}
-              clickFunc={() => { setNateOpen(false); }}
+              clickFunc={() => { setNateOpen(false) }}
               title={NATE_TITLE}
-              bio={NATE_BIO} />
+              bio={NATE_BIO}
+              posish={[90,355]} />
           )}
           {craigOpen && (
             <CharacterModal
               isOpen={craigOpen}
-              clickFunc={() => { setCraigOpen(false); }}
+              clickFunc={() => { setCraigOpen(false) }}
               title={CRAIG_TITLE}
-              bio={CRAIG_BIO} />
+              bio={CRAIG_BIO}
+              posish={[440,100]} />
           )}
           {willOpen && (
             <CharacterModal
               isOpen={willOpen}
-              clickFunc={() => { setWillOpen(false); }}
+              clickFunc={() => { setWillOpen(false) }}
               title={WILL_TITLE}
               bio={WILL_BIO} />
           )}
