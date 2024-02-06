@@ -9,7 +9,9 @@ import {
   Dropdown,
   RadioButton,
   Frame,
-  Fieldset
+  Fieldset,
+  Video,
+  Button
 } from '@react95/core';
 import '@react95/icons/icons.css';
 
@@ -22,7 +24,7 @@ import paulyImg from './assets/DiscoPaul.jpg';
 import './assets/desktop-styling.css';
 
 const EP_FEED_URL = 'https://anchor.fm/s/4cba81a4/podcast/rss';
-const POD_TITLE = "Emotive Pixels: Videogame Deep Dives";
+const POD_TITLE = "Emotive Pixels: Videogame Conversations";
 const NO_INSIGHT = "We haven\'t written any insight for this episode yet 😥";
 const ABOUT_PODCAST = "Hi! You've reached the website for Emotive Pixels, a videogame podcast hosted by a group of friends that originally met around a table in Seattle to casually banter about games we played. These days, we're a little more focused, and we have a bit more specific goals in how we cover games, so there's a fair difference between early episodes (labeled 'Season 1', up through episode 55) and the current seasons. You can find out about the hosts here, browse and listen to our episodes, and even get some behind-the-scenes insight on fun facts about each show.";
 
@@ -92,9 +94,11 @@ const App = () => {
   const [episodeText, setEpisodeText] = useState<string>('Episode info will appear here - pick an episode!');
   const [selectedEpisodeId, setSelectedEpisodeId] = useState<string>('');
   const [selectedEpisodeTitle, setSelectedEpisodeTitle] = useState<string>('');
+  const [selectedEpisodeFile, setSelectedEpisodeFile] = useState<string>('');
   const [selectedRadio, setSelectedRadio] = useState<string>('');
   const [insightsEnabled, setInsightsEnabled] = useState<boolean>(false);
   const [feedRssRaw, setFeedRssRaw] = useState<string>('');
+  // we're gonna need the element `link` and `itunes:image`
 
 // -------------------------
 // XML DATA PROCESSING STUFF
@@ -179,6 +183,17 @@ const App = () => {
 // APP DATA STATE STUFF
 // --------------------
 
+  const loadPlayer = async () => {
+    var xml = findEpisodeXmlItem(selectedEpisodeTitle);
+    if (xml) {
+      var url = xml.getElementsByTagName("enclosure")[0].getAttribute('url');
+      if (url) {
+        setSelectedEpisodeFile(url);
+        setPlayerOpen(true);
+      }
+    }
+  }
+
   const updateFrameInfo = async () => {
     // Update the episode text based on the selectedRadio value
     if (selectedRadio === 'd') {
@@ -227,24 +242,25 @@ const App = () => {
 
   const [startOpen, setStartOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(true);
+  const [playerOpen, setPlayerOpen] = useState(false);
   const [nateOpen, setNateOpen] = useState(false);
   const [craigOpen, setCraigOpen] = useState(false);
   const [willOpen, setWillOpen] = useState(false);
   const [paulyOpen, setPaulyOpen] = useState(false);
-
+{/* <Video w="320" src="https://media.w3.org/2010/05/sintel/trailer_hd.mp4" /> */}
   return (
     <ThemeProvider>
       <div id='grid-wrapper'> 
         <div className='row-two half-width'>
           <Frame padding={4}>
             <Frame boxShadow="in" padding={8} margin={2}>
-              <Fieldset legend="Episode browser">
-                <Dropdown
-                  options={titles}
-                  defaultValue={selectedEpisodeTitle}
-                  onChange={e => getEpisodeSeasonString(e.currentTarget.value) } />
-                <div className="toggle-options" style={{margin: '12px 0 -12px 0'}}>
-                  <div style={{width: '22%'}}>
+              <div className="container">
+                <Fieldset className="left" legend="Episode browser">
+                  <Dropdown
+                    options={titles}
+                    defaultValue={selectedEpisodeTitle}
+                    onChange={e => getEpisodeSeasonString(e.currentTarget.value) } />
+                  <div className="toggle-options" style={{margin: '12px 0 -12px 0'}}>
                     <RadioButton
                       value={'d'}
                       className='row-two'
@@ -252,17 +268,22 @@ const App = () => {
                       onChange={() => setSelectedRadio('d')}>
                       Description
                     </RadioButton>
+                    <RadioButton
+                      value={'i'}
+                      className='row-two'
+                      checked={selectedRadio === 'i'}
+                      onChange={() => setSelectedRadio('i')}
+                      disabled={!insightsEnabled}>
+                      Insights
+                    </RadioButton>
                   </div>
-                  <RadioButton
-                    value={'i'}
-                    className='row-two'
-                    checked={selectedRadio === 'i'}
-                    onChange={() => setSelectedRadio('i')}
-                    disabled={!insightsEnabled}>
-                    Insights
-                  </RadioButton>
+                </Fieldset>
+                <div className="right">
+                  <Button onClick={() => { loadPlayer(); }}>
+                    Player
+                  </Button>
                 </div>
-              </Fieldset>
+              </div>
               <Frame style={{ maxHeight: '150px', width: 500, overflowY: 'auto', padding: '0.5rem', margin: '16px 2px 2px 2px' }}>
                 <div 
                   style={{ lineHeight: '1.1' }}
@@ -280,7 +301,7 @@ const App = () => {
           paulyModal={setPaulyOpen} />
         {aboutOpen && (
           <Modal
-            width="500"
+            width="440"
             height="auto"
             icon={<img src={logoImg} width={32} />}
             title="About this podcast"
@@ -323,6 +344,9 @@ const App = () => {
             bio={PAULY_BIO}
             posish={[40,70]}
             icon={<img src={paulyImg} width={32} />} />
+        )}
+        {playerOpen && (
+          <Video w="320" src="https://media.w3.org/2010/05/sintel/trailer_hd.mp4" />
         )}
       </div>
       <div className="image-container">

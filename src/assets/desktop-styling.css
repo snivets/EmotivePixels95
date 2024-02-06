@@ -13,6 +13,20 @@ body {
   src: local('W95FA'), url(./w95fa.woff2) format('woff2');
 }
 
+.container {
+  display: flex;
+  flex-direction: row;
+}
+.left {
+  width: 80%;
+}
+.right {
+  width: 20%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Background EP logo */
 .image-container {
   z-index: -1;
@@ -44,6 +58,10 @@ a {
 .toggle-options {
   display: flex;
   align-items: start;
+}
+
+label {
+  width: 30%;
 }
 
 div[class^='Dropdown__'] {
