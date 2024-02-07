@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import DOMPurify from 'dompurify';
 import {
   ThemeProvider,
@@ -24,7 +24,6 @@ import useEpisodeSeasonString from './hooks/useEpisodeSeasonString.tsx';
 import useEpisodeTitles from './hooks/useEpisodeTitles.tsx';
 import useEpisodeDescription from './hooks/useEpisodeDescription.tsx';
 import useRssEpisodeFinder from './hooks/useRssEpisodeFinder.tsx';
-import ReactPlayer from 'react-player/file';
 
 const App = () => {
   const [titles, setTitles] = useState<any[]>([]);

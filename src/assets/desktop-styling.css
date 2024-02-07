@@ -70,10 +70,12 @@ div[class^='Dropdown__'] {
 
 div[class^='TitleBar__Title'] {
   line-height: 1.1;
+  margin-left: 5px;
 }
 
 span[class^='TaskBar__Truncate'] {
   margin-top: 3px;
+  margin-left: 5px;
 }
 
 div[class*='TitleBar__TitleBarBackground'] > img {
