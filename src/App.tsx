@@ -11,17 +11,16 @@ import {
   Button
 } from '@react95/core';
 import '@react95/icons/icons.css';
-
+import './assets/desktop-styling.css';
 import './text/Strings.ts';
-import notes from './text/episode-notes.json';
 import logoImg from './assets/ep-logo.jpg';
 import nateImg from './assets/DiscoNate.jpg';
 import craigImg from './assets/DiscoCraig.jpg';
 import willImg from './assets/DiscoWill.jpg';
 import paulyImg from './assets/DiscoPaul.jpg';
-import './assets/desktop-styling.css';
 import CharacterModal from './components/CharacterModal.tsx';
 import EPStartMenu from './components/EPStartMenu.tsx';
+import useEpisodeInsight from './hooks/useEpisodeInsight.tsx';
 
 const App = () => {
   const [titles, setTitles] = useState<any[]>([]);
@@ -31,12 +30,9 @@ const App = () => {
   const [selectedEpisodeFile, setSelectedEpisodeFile] = useState<string>('');
   const [selectedRadio, setSelectedRadio] = useState<string>('');
   const [insightsEnabled, setInsightsEnabled] = useState<boolean>(false);
-  const [feedRssRaw, setFeedRssRaw] = useState<string>('');
+  const [feedRss, setFeedRssRaw] = useState<string>('');
   // we're gonna need the element `link` and `itunes:image`
 
-// -------------------------
-// XML DATA PROCESSING STUFF
-// -------------------------
   const fetchData = async () => {
     try {
       // Get the podcast RSS feed via fetch
@@ -47,78 +43,22 @@ const App = () => {
     }
   };
 
-  function findEpisodeXmlItem(title: string): Element | null {
-    // Figure out which season and episode has this title
-    var foundE = null;
-    parsedFeed.forEach(e => {
-      const titleElement = e.querySelector("title");
-
-      if (titleElement && titleElement.textContent === title) {
-        foundE = e;
-        return;
-      }
-    });
-    return foundE;
-  }
-
-  function getEpisodeDescriptionFromEpisodeTitle(title: string): string {
-    var e = findEpisodeXmlItem(title);
-    if (!e)
-      return 'N/A';
-
-    var descriptionObj = e.getElementsByTagName("description");
-    var descriptionText = descriptionObj[0].textContent;
-    if (descriptionText?.startsWith('<p>')) {
-      descriptionText = descriptionText.substring(3, descriptionText.length - 5);
-    }
-    return descriptionText ?? 'No description!';
-  }
-
-  function getEpisodeInsightFromEpisodeId(episodeId: string): string {
-    var insight = NO_INSIGHT;
-    var attempt = notes.filter(n => n.episodeId == episodeId);
-    if (attempt.length > 0) {
-      insight = attempt[0].notes;
-    }
-    return insight;
-  }
-
-  // Used to populate the episode selector dropdown
-  function getTitles() {
-    var titlesInclusive = new window.DOMParser()
-      .parseFromString(feedRssRaw, 'text/xml')
-      .querySelectorAll("title");
-    return Array.from(titlesInclusive)
-      .map(t => t.textContent)
-      .filter(val => val !== '' && val !== POD_TITLE);
-  }
-
   // Get the string that describes an episode's position, e.g. S3E10
-  const getEpisodeSeasonString = (title: string) => {
-    var e = findEpisodeXmlItem(title);
-    var epId = 'bonus'; //default case
-    if (!e) {
+  const setEpisodeSeasonString = (title: string) => {
+    var epId = useEpisodeSeasonString(title, parsedFeed);
+
+    if (epId == '') {
       setEpisodeText('error!');
       return;
     }
 
-    var episode = e.getElementsByTagName("itunes:episode");
-    var season = e.getElementsByTagName("itunes:season");
-    if (episode.length > 0) {
-      epId = `S${season[0].textContent}E${episode[0].textContent}`;
-    }
-
     setSelectedEpisodeId(epId);
     setSelectedEpisodeTitle(title);
-    setInsightsEnabled(getEpisodeInsightFromEpisodeId(epId) !== NO_INSIGHT);
+    setInsightsEnabled(useEpisodeInsight(epId) !== NO_INSIGHT);
   }
 
-// --------------------
-// APP DATA STATE STUFF
-// --------------------
-
   const loadPlayer = async () => {
-    var xml = findEpisodeXmlItem(selectedEpisodeTitle);
+    var xml = useRssEpisodeFinder(selectedEpisodeTitle, parsedFeed);
     if (xml) {
       var url = xml.getElementsByTagName("enclosure")[0].getAttribute('url');
       if (url) {
@@ -132,17 +72,18 @@ const App = () => {
     // Update the episode text based on the selectedRadio value
     if (selectedRadio === 'd') {
       // Display description
-      setEpisodeText(getEpisodeDescriptionFromEpisodeTitle(selectedEpisodeTitle));
+      const episodeText = useEpisodeDescription(selectedEpisodeTitle, parsedFeed);
+      setEpisodeText(episodeText);
     } else if (selectedRadio === 'i') {
       // Display insights
-      setEpisodeText(getEpisodeInsightFromEpisodeId(selectedEpisodeId));
+      setEpisodeText(useEpisodeInsight(selectedEpisodeId));
     }
   }
 
   // Use useMemo to memoize parsedFeed
   const parsedFeed = useMemo(() => {
-    return new window.DOMParser().parseFromString(feedRssRaw, 'text/xml').querySelectorAll("item");
-  }, [feedRssRaw]);
+    return new window.DOMParser().parseFromString(feedRss, 'text/xml').querySelectorAll("item");
+  }, [feedRss]);
 
   // Get podcast XML data on page load
   useEffect(() => {
@@ -151,22 +92,22 @@ const App = () => {
 
   // When we get the RSS feed XML back, select the first item in the list
   useEffect(() => {
-    if (feedRssRaw && !selectedEpisodeTitle) {
+    if (feedRss && !selectedEpisodeTitle) {
       // Populate the dropdown with episode titles
-      let titles = getTitles();
+      let titles = useEpisodeTitles(feedRss);
       setTitles(titles);
       setSelectedRadio('d');
       setSelectedEpisodeTitle(titles[0] ?? ''); //populate dropdown with most recent episode
     }
-  }, [feedRssRaw]);
+  }, [feedRss]);
 
   // When the active episode changes, see if the insight button should be enabled
   useEffect(() => {
-    setInsightsEnabled(getEpisodeInsightFromEpisodeId(selectedEpisodeId) !== NO_INSIGHT);
+    setInsightsEnabled(useEpisodeInsight(selectedEpisodeId) !== NO_INSIGHT);
   }, [selectedEpisodeId]);
 
   useEffect(() => {
-    getEpisodeSeasonString(selectedEpisodeTitle);
+    setEpisodeSeasonString(selectedEpisodeTitle);
   }, [selectedEpisodeTitle]);
 
   // When we change radio OR dropdown options
@@ -193,7 +134,7 @@ const App = () => {
                   <Dropdown
                     options={titles}
                     defaultValue={selectedEpisodeTitle}
-                    onChange={e => getEpisodeSeasonString(e.currentTarget.value) } />
+                    onChange={e => setEpisodeSeasonString(e.currentTarget.value) } />
                   <div className="toggle-options" style={{margin: '12px 0 -12px 0'}}>
                     <RadioButton
                       value={'d'}
