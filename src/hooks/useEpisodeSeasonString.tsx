@@ -1,5 +1,7 @@
+import useRssEpisodeFinder from "./useRssEpisodeFinder";
+
 // Get the string that describes an episode's position, e.g. S3E10
-function useEpisodeSeasonString(title: string, feed: NodeListOf<Element>): string {
+export function useEpisodeSeasonString(title: string, feed: NodeListOf<Element>): string {
   var e = useRssEpisodeFinder(title, feed);
   if (!e) {
       return '';
@@ -14,3 +16,5 @@ function useEpisodeSeasonString(title: string, feed: NodeListOf<Element>): strin
 
   return epId;
 }
+
+export default useEpisodeSeasonString;

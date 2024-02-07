@@ -1,7 +1,8 @@
 import notes from '../text/episode-notes.json';
+import * as strings from '../text/Strings.ts';
 
 function useEpisodeInsight(episodeId: string): string {
-  var insight = NO_INSIGHT;
+  var insight = strings.NO_INSIGHT;
   if (!notes) {
     console.error('No episode notes found :(');
     return insight;

@@ -12,15 +12,19 @@ import {
 } from '@react95/core';
 import '@react95/icons/icons.css';
 import './assets/desktop-styling.css';
-import './text/Strings.ts';
 import logoImg from './assets/ep-logo.jpg';
 import nateImg from './assets/DiscoNate.jpg';
 import craigImg from './assets/DiscoCraig.jpg';
 import willImg from './assets/DiscoWill.jpg';
 import paulyImg from './assets/DiscoPaul.jpg';
+import * as strings from './text/Strings.ts';
 import CharacterModal from './components/CharacterModal.tsx';
 import EPStartMenu from './components/EPStartMenu.tsx';
 import useEpisodeInsight from './hooks/useEpisodeInsight.tsx';
+import useEpisodeSeasonString from './hooks/useEpisodeSeasonString.tsx';
+import useEpisodeTitles from './hooks/useEpisodeTitles.tsx';
+import useEpisodeDescription from './hooks/useEpisodeDescription.tsx';
+import useRssEpisodeFinder from './hooks/useRssEpisodeFinder.tsx';
 
 const App = () => {
   const [titles, setTitles] = useState<any[]>([]);
@@ -33,10 +37,10 @@ const App = () => {
   const [feedRss, setFeedRssRaw] = useState<string>('');
   // we're gonna need the element `link` and `itunes:image`
 
+  // Load the podcast RSS feed as soon as the page loads
   const fetchData = async () => {
     try {
-      // Get the podcast RSS feed via fetch
-      const response = await fetch(EP_FEED_URL);
+      const response = await fetch(strings.EP_FEED_URL);
       setFeedRssRaw(await response.text());
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -54,7 +58,7 @@ const App = () => {
 
     setSelectedEpisodeId(epId);
     setSelectedEpisodeTitle(title);
-    setInsightsEnabled(useEpisodeInsight(epId) !== NO_INSIGHT);
+    setInsightsEnabled(useEpisodeInsight(epId) !== strings.NO_INSIGHT);
   }
 
   const loadPlayer = async () => {
@@ -103,7 +107,7 @@ const App = () => {
 
   // When the active episode changes, see if the insight button should be enabled
   useEffect(() => {
-    setInsightsEnabled(useEpisodeInsight(selectedEpisodeId) !== NO_INSIGHT);
+    setInsightsEnabled(useEpisodeInsight(selectedEpisodeId) !== strings.NO_INSIGHT);
   }, [selectedEpisodeId]);
 
   useEffect(() => {
@@ -182,14 +186,14 @@ const App = () => {
             title="About this podcast"
             defaultPosition={{x: 5, y: 25}}
             closeModal={() => { setAboutOpen(false) }}
-        >{ABOUT_PODCAST}</Modal>
+        >{strings.ABOUT_PODCAST}</Modal>
         )}
         {nateOpen && (
           <CharacterModal
             isOpen={nateOpen}
             clickFunc={() => { setNateOpen(false) }}
-            title={NATE_TITLE}
-            bio={NATE_BIO}
+            title={strings.NATE_TITLE}
+            bio={strings.NATE_BIO}
             posish={[90,355]}
             icon={<img src={nateImg} width={32} />} />
         )}
@@ -197,8 +201,8 @@ const App = () => {
           <CharacterModal
             isOpen={craigOpen}
             clickFunc={() => { setCraigOpen(false) }}
-            title={CRAIG_TITLE}
-            bio={CRAIG_BIO}
+            title={strings.CRAIG_TITLE}
+            bio={strings.CRAIG_BIO}
             posish={[440,100]}
             icon={<img src={craigImg} width={32} />} />
         )}
@@ -206,8 +210,8 @@ const App = () => {
           <CharacterModal
             isOpen={willOpen}
             clickFunc={() => { setWillOpen(false) }}
-            title={WILL_TITLE}
-            bio={WILL_BIO}
+            title={strings.WILL_TITLE}
+            bio={strings.WILL_BIO}
             posish={[500, 290]}
             icon={<img src={willImg} width={32} />} />
         )}
@@ -215,13 +219,13 @@ const App = () => {
           <CharacterModal
             isOpen={paulyOpen}
             clickFunc={() => { setPaulyOpen(false) }}
-            title={PAULY_TITLE}
-            bio={PAULY_BIO}
+            title={strings.PAULY_TITLE}
+            bio={strings.PAULY_BIO}
             posish={[40,70]}
             icon={<img src={paulyImg} width={32} />} />
         )}
         {playerOpen && (
-          <Video w="320" src="https://media.w3.org/2010/05/sintel/trailer_hd.mp4" />
+          <Video w="320" src={selectedEpisodeFile} />
         )}
       </div>
       <div className="image-container">

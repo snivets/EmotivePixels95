@@ -1,3 +1,5 @@
+import useRssEpisodeFinder from "./useRssEpisodeFinder";
+
 function useEpisodeDescription(title: string, feed: NodeListOf<Element>): string {
   var e = useRssEpisodeFinder(title, feed);
   if (!e)
@@ -10,3 +12,5 @@ function useEpisodeDescription(title: string, feed: NodeListOf<Element>): string
   }
   return descriptionText ?? 'No description!';
 }
+
+export default useEpisodeDescription;

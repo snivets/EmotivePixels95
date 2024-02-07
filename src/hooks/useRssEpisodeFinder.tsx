@@ -11,3 +11,5 @@ function useRssEpisodeFinder(title: string, parsedFeed: NodeListOf<Element>): El
   });
   return foundE;
 }
+
+export default useRssEpisodeFinder;
