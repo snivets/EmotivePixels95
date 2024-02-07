@@ -12,13 +12,13 @@ import {
 } from '@react95/core';
 import '@react95/icons/icons.css';
 
-import notes from './assets/episode-notes.json';
+import './text/Strings.ts';
+import notes from './text/episode-notes.json';
 import logoImg from './assets/ep-logo.jpg';
 import nateImg from './assets/DiscoNate.jpg';
 import craigImg from './assets/DiscoCraig.jpg';
 import willImg from './assets/DiscoWill.jpg';
 import paulyImg from './assets/DiscoPaul.jpg';
-import './assets/TextConsts.ts';
 import './assets/desktop-styling.css';
 import CharacterModal from './components/CharacterModal.tsx';
 import EPStartMenu from './components/EPStartMenu.tsx';
